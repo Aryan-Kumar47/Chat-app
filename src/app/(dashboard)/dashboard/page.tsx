@@ -12,7 +12,7 @@ const page = async ({}) => {
     method: "POST",
     headers: {
     "Content-Type": "application/json",
-    "Another-Property": "Something here", },
+    },
     cache: 'no-store', 
     body : jsonString
   })
@@ -27,7 +27,7 @@ const page = async ({}) => {
         method: "POST",
         headers: {
         "Content-Type": "application/json",
-        "Another-Property": "Something here", },
+        },
         cache: 'no-store', 
         body : data
       })

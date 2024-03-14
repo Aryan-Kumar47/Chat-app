@@ -36,7 +36,7 @@ const layout = async ({ children } : LayoutProps) => {
     method: "POST",
     headers: {
     "Content-Type": "application/json",
-    "Another-Property": "Something here", },
+     },
     cache: 'no-store', 
     body : jsonString
   })
