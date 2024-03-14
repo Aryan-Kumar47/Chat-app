@@ -1,0 +1,95 @@
+import { chatHrefConstructor } from '@/lib/utils';
+import { Message } from '@/lib/validations/messages';
+import { ChevronRight, User } from 'lucide-react';
+import { cookies } from 'next/headers';
+import Link from 'next/link';
+import React, { FC } from 'react';
+
+const page = async ({}) => {
+  const cookiesValue = cookies().get('token')
+  const jsonString = JSON.stringify(cookiesValue)
+  const response = await fetch(`${process.env.DOMAIN}/api/friends/totalrequests` ,{ 
+    method: "POST",
+    headers: {
+    "Content-Type": "application/json",
+    "Another-Property": "Something here", },
+    cache: 'no-store', 
+    body : jsonString
+  })
+  const result = await response.json()
+  const friends = result.friends
+  const userId = result.user.id
+  const friendsWithLastMessage = await Promise.all(
+    friends.map(async (friend : any) => {
+      const chatId = chatHrefConstructor(friend.friendId , userId)
+      const data = JSON.stringify({chatId : chatId})
+      const response = await fetch(`${process.env.DOMAIN}/api/chat/getallchat` ,{ 
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json",
+        "Another-Property": "Something here", },
+        cache: 'no-store', 
+        body : data
+      })
+      const result = await response.json()
+      const lastMessage : Message[] = result.messages[result.messages.length -1]
+      return {
+        ...friend,
+        lastMessage
+      }
+    }
+  ))
+
+  return (
+    <div className='container py-12'>
+      <h1 className='font-bold text-5xl mb-8'>Recent chats</h1>
+      {friendsWithLastMessage.length === 0 ? (
+        <p className='text-sm text-zinc-500'>Nothing to show here...</p>
+      ) : (
+        friendsWithLastMessage.map((friend) => (
+          <div
+            key={friend.friendId}
+            className='relative bg-zinc-50 border border-zinc-200 p-3 rounded-md'>
+            <div className='absolute right-4 inset-y-0 flex items-center'>
+              <ChevronRight className='h-7 w-7 text-zinc-400' />
+            </div>
+
+            <Link
+              href={`/dashboard/chat/${chatHrefConstructor(
+                userId,
+                friend.friendId
+              )}`}
+              className='relative sm:flex'>
+              <div className='mb-4 flex-shrink-0 sm:mb-0 sm:mr-4'>
+                <div className='relative h-6 w-6'>
+                  {/* <Image
+                    referrerPolicy='no-referrer'
+                    className='rounded-full'
+                    alt={`${friend.name} profile picture`}
+                    src={friend.image}
+                    fill
+                  /> */}
+                  <User/>
+                </div>
+              </div>
+
+              <div>
+                <h4 className='text-lg font-semibold'>{friend.username}</h4>
+                <p className='mt-1 max-w-md'>
+                  <span className='text-zinc-400'>
+                    {friend.lastMessage.senderId === userId
+                      ? 'You: '
+                      : ''}
+                  </span>
+                  {friend.lastMessage.text}
+                </p>
+              </div>
+            </Link>
+          </div>
+        ))
+      )}
+    </div>
+  );
+};
+
+export default page;
