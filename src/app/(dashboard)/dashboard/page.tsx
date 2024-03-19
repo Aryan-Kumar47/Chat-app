@@ -1,38 +1,26 @@
 import { chatHrefConstructor } from '@/lib/utils';
 import { Message } from '@/lib/validations/messages';
-import { ChevronRight, User } from 'lucide-react';
+import { ChevronRight,  User2 } from 'lucide-react';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import React, { FC } from 'react';
+import React from 'react';
+import jwt from "jsonwebtoken";
+import Chat from '@/models/chatModel';
+import { totalRequest } from '@/helpers/totalRequest';
+
+
 
 const page = async ({}) => {
   const cookiesValue = cookies().get('token')
-  const jsonString = JSON.stringify(cookiesValue)
-  const response = await fetch(`${process.env.DOMAIN}/api/friends/totalrequests` ,{ 
-    method: "POST",
-    headers: {
-    "Content-Type": "application/json",
-    },
-    cache: 'no-store', 
-    body : jsonString
-  })
-  const result = await response.json()
-  const friends = result.friends
-  const userId = result.user.id
+  const decodedToken : any = jwt.verify( cookiesValue?.value!, process.env.TOKEN_SECRET!)
+  const userId = decodedToken.id
+  const response = await totalRequest(userId)
+  const friends = response.friends
   const friendsWithLastMessage = await Promise.all(
     friends.map(async (friend : any) => {
       const chatId = chatHrefConstructor(friend.friendId , userId)
-      const data = JSON.stringify({chatId : chatId})
-      const response = await fetch(`${process.env.DOMAIN}/api/chat/getallchat` ,{ 
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json",
-        },
-        cache: 'no-store', 
-        body : data
-      })
-      const result = await response.json()
-      const lastMessage : Message[] = result.messages[result.messages.length -1]
+      const chatContainer = await Chat.findOne({id : chatId})
+      const lastMessage : Message[] = chatContainer.messages[chatContainer.messages.length -1]
       return {
         ...friend,
         lastMessage
@@ -62,14 +50,7 @@ const page = async ({}) => {
               className='relative sm:flex'>
               <div className='mb-4 flex-shrink-0 sm:mb-0 sm:mr-4'>
                 <div className='relative h-6 w-6'>
-                  {/* <Image
-                    referrerPolicy='no-referrer'
-                    className='rounded-full'
-                    alt={`${friend.name} profile picture`}
-                    src={friend.image}
-                    fill
-                  /> */}
-                  <User/>
+                  <User2/>
                 </div>
               </div>
 

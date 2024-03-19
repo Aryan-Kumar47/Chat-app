@@ -1,8 +1,11 @@
 import ChatInput from '@/components/ChatInput';
 import Messages from '@/components/Messages';
+import { connect } from '@/dbConfig/dbConfig';
 import { Message } from '@/lib/validations/messages';
+import Chat from '@/models/chatModel';
+import User from '@/models/userModel';
 import jwt from 'jsonwebtoken';
-import { User } from 'lucide-react';
+import { User2 } from 'lucide-react';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import React, { FC } from 'react';
@@ -12,22 +15,15 @@ interface pageProps {
     chatId : string
   }
 }
+connect()
 
 async function getChatMessges(chatId:string) {
   try {
-    const data = JSON.stringify({chatId : chatId})
-    const response = await fetch(`${process.env.DOMAIN}/api/chat/getallchat` ,{ 
-      method: "POST",
-      headers: {
-      "Content-Type": "application/json",
-      "Another-Property": "Something here", },
-      cache: 'no-store', 
-      body : data
-    })
-    const result : Message[] = (await response.json()).messages
-    return result
+    const chatContainer = await Chat.findOne({id : chatId})
+    let chat : Message[] = chatContainer.messages
+    chat = JSON.parse(JSON.stringify(chat))
+    return chat
   } catch (error) {
-    console.log('in api')
     notFound()
   }
 }
@@ -41,32 +37,23 @@ const page: FC<pageProps> = async({params} : pageProps) => {
     notFound()
   }
   const chatPartnerId = user.id === userId1 ? userId2 : userId1
-  const chatPartnerJson = JSON.stringify({chatPartnerId : chatPartnerId})
-  const chatPartnerResponse =  await fetch(`${process.env.DOMAIN}/api/chat/chatpartner` ,{ 
-    method: "POST",
-    headers: {
-    "Content-Type": "application/json",
-    "Another-Property": "Something here", },
-    cache: 'no-store', 
-    body : chatPartnerJson
-  })
-  const chatPartner = await chatPartnerResponse.json()
+  const chatPartnerDetail = await User.findById(chatPartnerId)
+  if(!chatPartnerDetail) notFound()
+  const chatPartner = {
+    email : chatPartnerDetail.email,
+    username : chatPartnerDetail.username,
+    success :true
+  }
 
-  const initialMessages = await getChatMessges(chatId)
+  const initialMessages : Message[] = await getChatMessges(chatId)
+
   return (
     <div className='flex-1 justify-between flex flex-col h-full max-h-[calc(100vh-6rem)]'>
       <div className='flex sm:items-center justify-between py-3 border-b-2 border-gray-200'>
         <div className='relative flex items-center space-x-4'>
           <div className='relative'>
             <div className='relative w-8 sm:w-12 h-8 sm:h-12'>
-              {/* <Image
-                fill
-                referrerPolicy='no-referrer'
-                src={chatPartner.image}
-                alt={`${chatPartner.name} profile picture`}
-                className='rounded-full'
-              /> */}
-              <User className='rounded-full w-8 sm:w-12 h-8 sm:h-12'/>
+              <User2 className='rounded-full w-8 sm:w-12 h-8 sm:h-12'/>
             </div>
           </div>
 
@@ -86,8 +73,6 @@ const page: FC<pageProps> = async({params} : pageProps) => {
 
       <Messages
         chatId={chatId}
-        // chatPartner={chatPartner}
-        // sessionImg={session.user.image}
         sessionId={user.id}
         initialMessages={initialMessages}
       />

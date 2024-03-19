@@ -63,7 +63,6 @@ const AddFriendButton: FC<pageProps> = ({}) => {
         <Button>Add</Button>
       </div>
       <p className='mt-1 text-sm text-red-600'>{errors.email?.message}</p>
-      {/*<p className='mt-1 text-sm text-red-600'>something went wrong</p> */}
       {showSuccessState ? (
         <p className='mt-1 text-sm text-green-600'>Friend request sent</p>
       ) : null}

@@ -1,3 +1,4 @@
+
 'use client'
 import { pusherClient } from '@/lib/pusher';
 import { cn, toPusherKey } from '@/lib/utils';
@@ -78,15 +79,6 @@ const Messages: FC<MessagesProps> = ({
                   invisible: hasNextMessageFromSameUser,
                 })}>
                   <User className='w-6 h-6 rounded-full' />
-                {/* <Image
-                  fill
-                  src={
-                    isCurrentUser ? (sessionImg as string) : chatPartner.image
-                  }
-                  alt='Profile picture'
-                  referrerPolicy='no-referrer'
-                  className='rounded-full'
-                /> */}
               </div>
             </div>
           </div>

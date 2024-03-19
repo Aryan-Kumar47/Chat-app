@@ -1,7 +1,6 @@
 'use client'
 import { pusherClient } from '@/lib/pusher';
 import { toPusherKey } from '@/lib/utils';
-import axios from 'axios';
 import { User } from 'lucide-react';
 import Link from 'next/link';
 import React, { FC, useEffect } from 'react';

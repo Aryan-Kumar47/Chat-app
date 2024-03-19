@@ -3,16 +3,16 @@ import { Icon, Icons } from '@/components/Icons';
 import MobileChatLayout from '@/components/MobileChatLayout';
 import SidebarChatList from '@/components/SidebarChatList';
 import SignOutButton from '@/components/SignOutButton';
-import { User } from 'lucide-react';
 import { cookies } from 'next/headers';
-import Image from 'next/image';
 import Link from 'next/link';
-import React, { FC , ReactNode } from 'react';
+import React, { ReactNode } from 'react';
+import jwt from "jsonwebtoken";
+import { User2 } from 'lucide-react';
+import { totalRequest } from '@/helpers/totalRequest';
 
 interface LayoutProps {
   children : ReactNode
 }
-
 interface SidebarOption {
   id : number,
   name : string,
@@ -31,25 +31,25 @@ const sidebarOptions : SidebarOption[] = [
 
 const layout = async ({ children } : LayoutProps) => {
   const cookiesValue = cookies().get('token')
-  const jsonString = JSON.stringify(cookiesValue)
-  const response = await fetch(`${process.env.DOMAIN}/api/friends/totalrequests` ,{ 
-    method: "POST",
-    headers: {
-    "Content-Type": "application/json",
-     },
-    cache: 'no-store', 
-    body : jsonString
-  })
-  const result = await response.json()
-  const unseenRequestCount : number = result.requests.length
-  const friends = result.friends
-  const userId = result.user.id
+  const decodedToken : any = jwt.verify( cookiesValue?.value!, process.env.TOKEN_SECRET!)
+  const userId = decodedToken.id
+
+  const response = await totalRequest(userId)
+
+  const session = {
+    id : userId,
+    username : decodedToken.username,
+    email : decodedToken.email
+  }
+
+  const unseenRequestCount : number = response.request.length
+  const friends = response.friends
   return (
     <div className='w-full flex h-screen'>
       <div className='md:hidden'>
         <MobileChatLayout
           friends={friends}
-          session={result.user}
+          session={session}
           sidebarOptions={sidebarOptions}
           unseenRequestCount={unseenRequestCount}
         />
@@ -103,20 +103,13 @@ const layout = async ({ children } : LayoutProps) => {
             <li className='-mx-6 mt-auto flex items-center'>
               <div className='flex flex-1 items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900'>
                 <div className='relative h-8 w-8 bg-gray-50'>
-                  {/* <Image 
-                    fill
-                    referrerPolicy='no-referrer'
-                    className='rounded-full'
-                    src={''}
-                    alt='Your profile picture'
-                  /> */}
-                  <User/>
+                  <User2/>
                 </div>
                 <span className='sr-only'>Your profile</span>
                 <div className='flex flex-col'>
-                  <span aria-hidden='true'>{result.user.username}</span>
+                  <span aria-hidden='true'>{decodedToken.username}</span>
                   <span className='text-xs text-zinc-400' aria-hidden='true'>
-                    {result.user.email}
+                    {decodedToken.email}
                   </span>
                 </div>
               </div>
