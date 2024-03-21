@@ -1,5 +1,4 @@
 import ChatInput from '@/components/ChatInput';
-import DeleteChatButton from '@/components/DeleteChatButton';
 import Messages from '@/components/Messages';
 import { connect } from '@/dbConfig/dbConfig';
 import { authOptions } from '@/lib/auth';
