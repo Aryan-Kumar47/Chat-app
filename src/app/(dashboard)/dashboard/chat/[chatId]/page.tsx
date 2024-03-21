@@ -1,12 +1,13 @@
 import ChatInput from '@/components/ChatInput';
+import DeleteChatButton from '@/components/DeleteChatButton';
 import Messages from '@/components/Messages';
 import { connect } from '@/dbConfig/dbConfig';
+import { authOptions } from '@/lib/auth';
 import { Message } from '@/lib/validations/messages';
 import Chat from '@/models/chatModel';
-import User from '@/models/userModel';
-import jwt from 'jsonwebtoken';
-import { User2 } from 'lucide-react';
-import { cookies } from 'next/headers';
+import Users from '@/models/userModel';
+import { getServerSession } from 'next-auth';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import React, { FC } from 'react';
 
@@ -21,6 +22,7 @@ async function getChatMessges(chatId:string) {
   try {
     const chatContainer = await Chat.findOne({id : chatId})
     let chat : Message[] = chatContainer.messages
+    chat = chat.reverse()
     chat = JSON.parse(JSON.stringify(chat))
     return chat
   } catch (error) {
@@ -30,19 +32,21 @@ async function getChatMessges(chatId:string) {
 
 const page: FC<pageProps> = async({params} : pageProps) => {
   const {chatId} = params
-  const cookiesValue = cookies().get('token')
-  const user : any = jwt.verify(cookiesValue?.value! , process.env.TOKEN_SECRET!)
+  const session = await getServerSession(authOptions)
+  const userId = session?.user.id
   const [userId1 , userId2] = chatId.split('--')
-  if(user.id !== userId1 && user.id !== userId2) {
+  if(userId !== userId1 && userId !== userId2) {
     notFound()
   }
-  const chatPartnerId = user.id === userId1 ? userId2 : userId1
-  const chatPartnerDetail = await User.findById(chatPartnerId)
+  const chatPartnerId = userId === userId1 ? userId2 : userId1
+  if(!chatPartnerId) notFound()
+  const chatPartnerDetail = await Users.findById(chatPartnerId)
   if(!chatPartnerDetail) notFound()
   const chatPartner = {
+    id : chatPartnerDetail.id,
     email : chatPartnerDetail.email,
-    username : chatPartnerDetail.username,
-    success :true
+    username : chatPartnerDetail.name,
+    image : chatPartnerDetail.image,
   }
 
   const initialMessages : Message[] = await getChatMessges(chatId)
@@ -53,7 +57,13 @@ const page: FC<pageProps> = async({params} : pageProps) => {
         <div className='relative flex items-center space-x-4'>
           <div className='relative'>
             <div className='relative w-8 sm:w-12 h-8 sm:h-12'>
-              <User2 className='rounded-full w-8 sm:w-12 h-8 sm:h-12'/>
+            <Image
+                fill
+                referrerPolicy='no-referrer'
+                src={chatPartner.image}
+                alt={`${chatPartner.username} profile picture`}
+                className='rounded-full'
+              />
             </div>
           </div>
 
@@ -69,12 +79,15 @@ const page: FC<pageProps> = async({params} : pageProps) => {
             </span>
           </div>
         </div>
+        {/* <DeleteChatButton chatId={chatId}/> */}
       </div>
 
       <Messages
         chatId={chatId}
-        sessionId={user.id}
+        sessionId={userId}
         initialMessages={initialMessages}
+        chatPartner={chatPartner}
+        sessionImg={session?.user.image}
       />
       <ChatInput chatId={chatId} chatPartner={chatPartner} />
     </div>

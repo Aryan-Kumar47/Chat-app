@@ -32,6 +32,7 @@ const SidebarChatList: FC<SidebarChatListProps> = ({friends , userId}) => {
     pusherClient.subscribe(toPusherKey(`user:${userId}:friends`))
 
     const newFriendHandler = (newFriend : Friends) => {
+      console.log('friend : ' + newFriend)
       setActiveChats((prev) => [...prev , newFriend])
     }
     const chatHandler = (message : ExtendedMessage) => {
@@ -61,7 +62,7 @@ const SidebarChatList: FC<SidebarChatListProps> = ({friends , userId}) => {
     }
   } , [pathname , userId , router])
   useEffect(() => {
-    if(pathname.includes('chat')){
+    if(pathname?.includes('chat')){
       setUnseenMessages((prev) => {
         return prev.filter((msg) => !pathname.includes(msg.senderId))
       })

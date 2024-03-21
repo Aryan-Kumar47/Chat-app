@@ -1,25 +1,26 @@
 import { chatHrefConstructor } from '@/lib/utils';
 import { Message } from '@/lib/validations/messages';
 import { ChevronRight,  User2 } from 'lucide-react';
-import { cookies } from 'next/headers';
 import Link from 'next/link';
 import React from 'react';
-import jwt from "jsonwebtoken";
 import Chat from '@/models/chatModel';
 import { totalRequest } from '@/helpers/totalRequest';
+import { authOptions } from '@/lib/auth';
+import { getServerSession } from 'next-auth';
+import Image from 'next/image';
 
 
 
 const page = async ({}) => {
-  const cookiesValue = cookies().get('token')
-  const decodedToken : any = jwt.verify( cookiesValue?.value!, process.env.TOKEN_SECRET!)
-  const userId = decodedToken.id
+  const session = await getServerSession(authOptions)
+  const userId = session?.user.id as string
   const response = await totalRequest(userId)
   const friends = response.friends
   const friendsWithLastMessage = await Promise.all(
     friends.map(async (friend : any) => {
       const chatId = chatHrefConstructor(friend.friendId , userId)
       const chatContainer = await Chat.findOne({id : chatId})
+      if(!chatContainer) return
       const lastMessage : Message[] = chatContainer.messages[chatContainer.messages.length -1]
       return {
         ...friend,
@@ -50,7 +51,13 @@ const page = async ({}) => {
               className='relative sm:flex'>
               <div className='mb-4 flex-shrink-0 sm:mb-0 sm:mr-4'>
                 <div className='relative h-6 w-6'>
-                  <User2/>
+                <Image
+                    referrerPolicy='no-referrer'
+                    className='rounded-full'
+                    alt={`${friend.name} profile picture`}
+                    src={friend.image}
+                    fill
+                  />
                 </div>
               </div>
 

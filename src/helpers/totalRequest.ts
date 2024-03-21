@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 interface TotalRequest {
   email : string,
   username : string,
+  image : string,
   id : string,
   friendId : string,
 }
@@ -23,12 +24,14 @@ export const totalRequest = async (userId : string) => {
         email : ele.email,
         username : ele.username,
         id : ele._id.toString(),
+        image : ele.image,
         friendId : ele.friendId
       })
       else if (!ele.requestPending) totalFriends.push({
         email : ele.email,
         username : ele.username,
         id : ele._id.toString()  ,
+        image : ele.image,
         friendId : ele.friendId
       })
     })

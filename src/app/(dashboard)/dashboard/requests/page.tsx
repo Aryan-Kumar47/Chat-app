@@ -3,12 +3,13 @@ import { cookies } from 'next/headers';
 import React from 'react';
 import jwt from "jsonwebtoken";
 import { totalRequest } from '@/helpers/totalRequest';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 
 const page = async() => {
-  const cookiesValue = cookies().get('token')
-  const decodedToken : any = jwt.verify( cookiesValue?.value!, process.env.TOKEN_SECRET!)
-  const userId = decodedToken.id
+  const session = await getServerSession(authOptions)
+  const userId = session?.user.id as string
   const response = await totalRequest(userId)
   const value = response.request
   return (

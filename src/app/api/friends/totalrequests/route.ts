@@ -2,8 +2,6 @@ import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
-import { getDataFromToken } from "@/helpers/getDataFromToken";
 
 connect()
 

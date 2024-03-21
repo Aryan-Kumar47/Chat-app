@@ -3,21 +3,16 @@ import { Icon, Icons } from '@/components/Icons';
 import MobileChatLayout from '@/components/MobileChatLayout';
 import SidebarChatList from '@/components/SidebarChatList';
 import SignOutButton from '@/components/SignOutButton';
-import { cookies } from 'next/headers';
 import Link from 'next/link';
 import React, { ReactNode } from 'react';
-import jwt from "jsonwebtoken";
-import { User2 } from 'lucide-react';
 import { totalRequest } from '@/helpers/totalRequest';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { SidebarOption } from '@/types/typings';
+import Image from 'next/image';
 
 interface LayoutProps {
   children : ReactNode
-}
-interface SidebarOption {
-  id : number,
-  name : string,
-  href : string,
-  Icon : Icon,
 }
 
 const sidebarOptions : SidebarOption[] = [
@@ -30,18 +25,9 @@ const sidebarOptions : SidebarOption[] = [
 ]
 
 const layout = async ({ children } : LayoutProps) => {
-  const cookiesValue = cookies().get('token')
-  const decodedToken : any = jwt.verify( cookiesValue?.value!, process.env.TOKEN_SECRET!)
-  const userId = decodedToken.id
-
+  const session = await getServerSession(authOptions)
+  const userId = session?.user.id as string
   const response = await totalRequest(userId)
-
-  const session = {
-    id : userId,
-    username : decodedToken.username,
-    email : decodedToken.email
-  }
-
   const unseenRequestCount : number = response.request.length
   const friends = response.friends
   return (
@@ -55,9 +41,12 @@ const layout = async ({ children } : LayoutProps) => {
         />
       </div>
       <div className='hidden md:flex h-full w-full max-w-xs grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6'>
-        <Link href='/dashboard' className='flex h-16 shrink-0 items-center'>
-          <Icons.Logo className='h-8 w-auto text-indigo-600' />
-        </Link>
+        <div className='flex h-16 shrink-0 items-center justify-center'>
+          <Link href='/dashboard' className='flex gap-x-2 w-fit px-2 py-1'>
+            <Icons.MessagesSquare className='h-8 w-auto text-indigo-600' />
+            <span className='text-indigo-600 text-xl font-semibold'>Quicky Chat</span>
+          </Link>
+        </div>
 
         {friends.length > 0 ? <div className='text-xs font-semibold leading-6 text-gray-400'>
           Your chats
@@ -100,16 +89,22 @@ const layout = async ({ children } : LayoutProps) => {
             </li>
 
 
-            <li className='-mx-6 mt-auto flex items-center'>
-              <div className='flex flex-1 items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900'>
+            <li className='-mx-5 mt-auto flex items-center'>
+              <div className='flex flex-1 items-center gap-x-4 px-3 py-3 text-sm font-semibold leading-6 text-gray-900'>
                 <div className='relative h-8 w-8 bg-gray-50'>
-                  <User2/>
+                <Image
+                    fill
+                    referrerPolicy='no-referrer'
+                    className='rounded-full'
+                    src={session?.user.image || ''}
+                    alt='Your profile picture'
+                  />
                 </div>
                 <span className='sr-only'>Your profile</span>
                 <div className='flex flex-col'>
-                  <span aria-hidden='true'>{decodedToken.username}</span>
+                  <span aria-hidden='true'>{session?.user.name}</span>
                   <span className='text-xs text-zinc-400' aria-hidden='true'>
-                    {decodedToken.email}
+                    {session?.user.email}
                   </span>
                 </div>
               </div>

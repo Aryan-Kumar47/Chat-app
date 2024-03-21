@@ -2,6 +2,18 @@
 
 # dependencies
 /node_modules
+/src/helpers/getDataFromToken.ts
+/src/helpers/mailer.ts
+/src/(auth)/forgetpassword
+/src/(auth)/resetpassword
+/src/(auth)/signup
+/src/(auth)/verifyemail
+/src/api/users
+/src/api/friends/delete
+/src/api/friends/totalrequests
+/src/api/chat/delete
+/src/api/chat/chatpartner
+/src/api/chat/getallchat
 /.env
 /.pnp
 .pnp.js
