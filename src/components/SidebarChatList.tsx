@@ -19,6 +19,7 @@ interface SidebarChatListProps {
 }
 
 interface ExtendedMessage extends Message {
+  senderImg : string,
   senderName : string
 }
 
@@ -47,6 +48,7 @@ const SidebarChatList: FC<SidebarChatListProps> = ({friends , userId}) => {
           senderId={message.senderId}
           senderName={message.senderName}
           senderMessage={message.text}
+          senderImg={message.senderImg}
         />
       ))
       setUnseenMessages((prev) => [...prev , message])

@@ -1,5 +1,6 @@
 import { chatHrefConstructor, cn } from '@/lib/utils'
 import { User } from 'lucide-react'
+import Image from 'next/image'
 import { FC } from 'react'
 import { toast, type Toast } from 'react-hot-toast'
 
@@ -9,6 +10,7 @@ interface UnseenChatToastProps {
   senderId: string
   senderName: string
   senderMessage: string
+  senderImg : string
 }
 
 const UnseenChatToast: FC<UnseenChatToastProps> = ({
@@ -17,6 +19,7 @@ const UnseenChatToast: FC<UnseenChatToastProps> = ({
   userId,
   senderName,
   senderMessage,
+  senderImg
 }) => {
   return (
     <div
@@ -31,7 +34,13 @@ const UnseenChatToast: FC<UnseenChatToastProps> = ({
         <div className='flex items-start'>
           <div className='flex-shrink-0 pt-0.5'>
             <div className='relative h-10 w-10'>
-              <User/>
+              <Image
+                fill
+                referrerPolicy='no-referrer'
+                className='rounded-full'
+                src={senderImg}
+                alt='Your profile picture'
+              />
             </div>
           </div>
 
