@@ -96,7 +96,7 @@ const FriendRequests: FC<FriendRequestsProps> = ({incomingFriendRequests , userI
         <p className='text-sm text-zinc-500'>Nothing to show here...</p>
       ) : (
         friendRequests.map((request) => (
-          <div key={request.id} className='flex gap-4 items-center'>
+          <div key={request.id} className='flex sm:gap-4 gap-2 items-center'>
             <UserPlus className='text-black' />
             <p className='font-medium text-lg'>{request.email}</p>
             <button

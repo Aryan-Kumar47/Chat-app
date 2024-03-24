@@ -28,7 +28,7 @@ interface User {
 }
 
 interface MobileChatLayoutProps {
-  friends: User[]
+  friends: any
   session: any
   sidebarOptions: SidebarOption[]
   unseenRequestCount: number
@@ -104,7 +104,7 @@ const MobileChatLayout: FC<MobileChatLayoutProps> = ({ friends, session, sidebar
                             <li>
                               <SidebarChatList
                                 friends={friends}
-                                userId={session.id}
+                                userId={session?.user.id}
                               />
                             </li>
 
@@ -116,7 +116,7 @@ const MobileChatLayout: FC<MobileChatLayoutProps> = ({ friends, session, sidebar
                                 {sidebarOptions.map((option) => {
                                   const Icon = Icons[option.Icon]
                                   return (
-                                    <li key={option.name}>
+                                    <li key={option.id}>
                                       <Link
                                         href={option.href}
                                         className='text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'>
@@ -133,10 +133,8 @@ const MobileChatLayout: FC<MobileChatLayoutProps> = ({ friends, session, sidebar
 
                                 <li>
                                   <FriendRequestSidebarOptions
-                                    initialUnseenRequestCount={
-                                      unseenRequestCount
-                                    }
-                                    userId={session.id}
+                                    initialUnseenRequestCount={unseenRequestCount}
+                                    userId={session?.user.id}
                                   />
                                 </li>
                               </ul>
